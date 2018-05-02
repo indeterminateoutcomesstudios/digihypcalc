@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  form#osrupload(action="/stat", method="post" encType="multipart/form-data")
+    input#file(type="file", name="osr")
+    input(type="hidden", name="browser" value="true").
+    input(type="submit", value="")
+
+  p.
+    this should show the leaderboard by default and update 
+    to show the newly submitted play when a post request is submitted
