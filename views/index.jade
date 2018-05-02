@@ -4,7 +4,7 @@ block content
   h1= title
   p Welcome to #{title}
   form#osrupload(action="/stat", method="post" encType="multipart/form-data")
-    input#file(type="file", name="osr")
+    input#file(type="file", name="osr" required)
     input(type="hidden", name="browser" value="true").
     input(type="submit", value="")
 
