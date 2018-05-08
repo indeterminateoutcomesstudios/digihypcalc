@@ -1,13 +1,12 @@
 // const
-const fs = require("fs")
-const express = require("express")
-const app = express()
+const request = require("sync-request");
+const osutoken = require("../../config.json").osutoken;
 const MODES = [
 	"osu",
 	"taiko",
 	"catch",
 	"mania"
-]
+];
 
 /* 
 //region
@@ -52,11 +51,35 @@ Long	Unknown
 
 
 // functions
+const omctscore = function omctscore(replaydata) {
+	return (
+		0.7 + 
+		(
+			0.1 ^ (replaydata.mapdata.max_combo / replaydata.combo) + 
+			0.2 ^ (1 / replaydata.accuracy)
+		) / 
+		(1.01 ^ replaydata.num0s)
+	);
+};
 
-readstringfrombeginning = function (mybuffer) {
-	uleb = [];
-	length = 0
-	if (mybuffer[0] == 0x00) {
+
+const getmapdata = function getmapdata(mapid) {
+	var uri = "https://osu.ppy.sh/api/get_beatmaps?"
+		+ "k=" + osutoken
+		+ "&h=" + mapid;
+	console.log("getting from osu api: "+uri);
+	let res = request("get", uri);
+	try {
+		return JSON.parse(res.getBody("UTF-8"))[0];
+	} catch (e) {
+		return "err";
+	}
+};
+
+const readstringfrombeginning = function readstringfrombeginning(mybuffer) {
+	let uleb = [];
+	let length = 0;
+	if (mybuffer[0] === 0x00) {
 		return {"value": null, "length": length};
 	}
 	mybuffer = mybuffer.slice(1);
@@ -72,47 +95,50 @@ readstringfrombeginning = function (mybuffer) {
 		}
 	}
 
-	lengthofstring = parseInt(uleb.join(""), 2)
-	length += lengthofstring
+	let lengthofstring = parseInt(uleb.join(""), 2);
+	length += lengthofstring;
 
-	extractedstring = mybuffer.toString("utf-8", 1, lengthofstring+1)
+	let extractedstring = mybuffer.toString("utf-8", 1, lengthofstring+1);
 
 	// also needs to return the length of all the data
 	return { "value": extractedstring, "length":  length};
-}
+};
 
-getvals = function (data) {
+const getvals = function getvals(data) {
 
-	let readerlocation = 0
-	let replaydata = {}
+	let readerlocation = 0;
+	let replaydata = {};
 
 	// get the mode
-	replaydata.mode = MODES[data.readIntLE(readerlocation, 1)]
+	replaydata.mode = MODES[data.readIntLE(readerlocation, 1)];
 	readerlocation += 1;
 
 	// get the date
 	replaydata.date = data.readIntLE(readerlocation, 4).toString();
-	replaydata.date = new Date(replaydata.date.substr(0, 4), replaydata.date.substr(4, 2), replaydata.date.substr(6, 2));
+	replaydata.date = new Date(replaydata.date.substr(0, 4),
+							   replaydata.date.substr(4, 2),
+							   replaydata.date.substr(6, 2)
+							);
 	readerlocation += 4;
 
 	// get the map md5 hash
 	replaydata.mapmd5 = readstringfrombeginning(data.slice(readerlocation));
-	readerlocation += replaydata.mapmd5.length
-	replaydata.mapmd5 = replaydata.mapmd5.value
+	readerlocation += replaydata.mapmd5.length;
+	replaydata.mapmd5 = replaydata.mapmd5.value;
 
 	// get the player name
-	replaydata.playername = readstringfrombeginning(data.slice(readerlocation))
-	readerlocation += replaydata.playername.length
-	replaydata.playername = replaydata.playername.value
+	replaydata.playername = readstringfrombeginning(data.slice(readerlocation));
+	readerlocation += replaydata.playername.length;
+	replaydata.playername = replaydata.playername.value;
 
 	// get the replay md5 hash
 	replaydata.replaymd5 = readstringfrombeginning(data.slice(readerlocation));
-	readerlocation += replaydata.replaymd5.length
-	replaydata.replaymd5 = replaydata.replaymd5.value
+	readerlocation += replaydata.replaymd5.length;
+	replaydata.replaymd5 = replaydata.replaymd5.value;
 
 	// get the number of 300s
 	replaydata.num300s = data.readIntLE(readerlocation, 2);
-	readerlocation += 2
+	readerlocation += 2;
 
 	// get the number of 100s
 	replaydata.num100s = data.readIntLE(readerlocation, 2);
@@ -139,7 +165,7 @@ getvals = function (data) {
 	readerlocation += 4;
 
 	// get the max combo
-	replaydata.maxcombo = data.readIntLE(readerlocation, 2);
+	replaydata.combo = data.readIntLE(readerlocation, 2);
 	readerlocation += 2;
 
 	// is play fc?
@@ -149,14 +175,32 @@ getvals = function (data) {
 
 	// get the mods enum
 	replaydata.mods = data.readIntLE(readerlocation, 4);
-	readerlocation += 4
+	readerlocation += 4;
 
-	replaydata.health = readstringfrombeginning(data.slice(readerlocation))
+	replaydata.health = readstringfrombeginning(data.slice(readerlocation));
 	readerlocation += replaydata.health.length;
 	replaydata.health = replaydata.health.value;
 
+	replaydata.accuracy = (
+		(	(replaydata.num300s*300 + replaydata.num100s*100) +
+		(replaydata.num50s*50 + replaydata.num0s*0)		)
+		/
+		(   (replaydata.num300s*300 + replaydata.num100s*300) +
+		(replaydata.num50s*300 + replaydata.num0s*300)		)
+	);
+
+	const mapdata = getmapdata(replaydata.mapmd5);
+	if (mapdata !== "err") { 
+		replaydata.mapdat = mapdata;
+	} else { 
+		replaydata.mapdata = null;
+	}
+
+	mapdata !== "err" ? replaydata.omct_score = omctscore(replaydata) : replaydata.omct_score = -1;
+
 	return replaydata;
-}
+
+};
 
 exports.getvals = getvals;
 exports.MODES = MODES;
