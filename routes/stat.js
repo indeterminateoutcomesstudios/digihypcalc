@@ -23,6 +23,7 @@ router.post('/', function (req, res) {
   console.log("recieved uploaded file");
   console.log(req.body);
   let vals = parser.getvals(uploaded_file.data);
+  res.status(200).send(vals);
 
   // Use connect method to connect to the server
 
@@ -31,7 +32,6 @@ router.post('/', function (req, res) {
 
     console.log("responding");
 
-    res.status(200).send(vals);
 
   });
 
