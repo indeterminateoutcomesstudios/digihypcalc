@@ -64,3 +64,4 @@ typings/
 # ide config folders
 .vscode
 .idea
+.*rc*
