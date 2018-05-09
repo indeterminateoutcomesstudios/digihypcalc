@@ -191,12 +191,16 @@ const getvals = function getvals(data) {
 
 	const mapdata = getmapdata(replaydata.mapmd5);
 	if (mapdata !== "err") { 
-		replaydata.mapdat = mapdata;
+		replaydata.mapdata = mapdata;
 	} else { 
 		replaydata.mapdata = null;
 	}
 
-	mapdata !== "err" ? replaydata.omct_score = omctscore(replaydata) : replaydata.omct_score = -1;
+	if (mapdata !== "err") {
+		replaydata.omct_score = omctscore(replaydata);
+	} else {
+		replaydata.omct_score = -1;
+	}
 
 	return replaydata;
 
