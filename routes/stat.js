@@ -9,33 +9,36 @@ var parser = require("../public/javascripts/parser");
 */
 
 router.post('/', function (req, res) {
-  
+
   console.log("post req recieved");
+
+  // if theres no file cant do anything
+  // (shouldnt happen becuase html file upload has required attribute)
+  if (!req.files) {
+    res.status(400).send("Please attach a file");
+    return;
+  }
+
   let uploaded_file = req.files.osr;
   console.log("recieved uploaded file");
-  console.log(req.body)
-  let vals = parser.getvals(uploaded_file.data)
-  
-  console.log("responding")
-  
-  if(req.body.browser == "true") {
+  console.log(req.body);
+  let vals = parser.getvals(uploaded_file.data);
 
+  // Use connect method to connect to the server
 
+  global.db.collection("omct_submits")
+    .insertOne({"play": vals}, function(err, result) {
 
-    res.render('stat', { title: 'Express' });
-  } else {
-    res.status(200).send(vals);
-  }
-  
-  
+    console.log("responding");
+
+    if(req.body.browser == "true") {
+      res.render('stat', { title: 'Express' });
+    } else {
+      res.status(200).send(vals);
+    }
+
+  });
+
 });
-
-router.use('/', function (req, res, next) {
-  console.log("sometihng")
-  // get leaderboards from database
-  lb = {} //leaderboard_object
-  res.render('stat', { title: 'Express' , lb: lb});
-});
-
 
 module.exports = router;

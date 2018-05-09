@@ -42,4 +42,22 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+const db_things = require("config.json").db_settings;
+const MongoClient = require("mongodb").MongoClient;
+
+// Connection URL
+const url = "mongodb+srv://" + db_things.username + ":" + db_things.pass + "@" + db_things.ip;
+
+// Database Name
+const dbName = "omct";
+let db;
+
+// get the database onject to interact with so we dont need to connect with every request
+MongoClient.connect(url, function (err, client) {
+  db = client.db(dbName);
+  console.log("connected to server at " + db_things.ip);
+});
+
+global.db = db
+
 module.exports = app;
