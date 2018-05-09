@@ -1,0 +1,8 @@
+{
+	"osutoken": "longstring",
+	"db_settings": {
+		"ip": "mydb-himom.mongodb.net/endpoint",
+		"username": "myname",
+		"pass": "mypass"
+	}
+}
