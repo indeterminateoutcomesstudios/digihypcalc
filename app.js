@@ -42,7 +42,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-const db_things = require("config.json").db_settings;
+const db_things = require("./config.json").db_settings;
 const MongoClient = require("mongodb").MongoClient;
 
 // Connection URL
