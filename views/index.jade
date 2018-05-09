@@ -1,8 +1,17 @@
 extends layout
+mixin playerrow(player)
+  tr
+    td.prfp 
+      img(
+        src="#{'http://a.ppy.sh/' + player.id}" 
+        alt="oralekin's profile picture"
+        )
+    td.name
+      a(href="#{player.id}")= player.name
+    td.data= "(" + player.name + "'s score)"
 
 block content
   h1= title
-  p Welcome to #{title}
   form#osrupload(action="/stat", method="post" encType="multipart/form-data")
     input#file(type="file", name="osr" required)
     input(type="hidden", name="browser" value="true").
@@ -11,3 +20,8 @@ block content
   p.
     this should show the leaderboard by default and update 
     to show the newly submitted play when a post request is submitted
+  table#leaderboard
+    thead
+    tbody
+    each player in players
+      +playerrow(player)
