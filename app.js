@@ -54,8 +54,12 @@ let db;
 
 // get the database onject to interact with so we dont need to connect with every request
 MongoClient.connect(url, function (err, client) {
-  db = client.db(dbName);
-  console.log("connected to server at " + db_things.ip);
+  if (err) {
+    console.log(err)
+  } else {
+    db = client.db(dbName);
+    console.log("connected to server at " + db_things.ip);
+  }
 });
 
 global.db = db
