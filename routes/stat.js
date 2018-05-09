@@ -31,11 +31,7 @@ router.post('/', function (req, res) {
 
     console.log("responding");
 
-    if(req.body.browser == "true") {
-      res.render('stat', { title: 'Express' });
-    } else {
-      res.status(200).send(vals);
-    }
+    res.status(200).send(vals);
 
   });
 
