@@ -1,7 +1,9 @@
 {
 	"osutoken": "longstring",
 	"db_settings": {
+		"protocol": "mongodb+srv:",
 		"ip": "mydb-himom.mongodb.net/endpoint",
+		"auth?": false,
 		"username": "myname",
 		"pass": "mypass"
 	}

@@ -46,7 +46,14 @@ const db_things = require("./config.json").db_settings;
 const MongoClient = require("mongodb").MongoClient;
 
 // Connection URL
-const url = "mongodb+srv://" + db_things.username + ":" + db_things.pass + "@" + db_things.ip;
+let url = db_things.ip;
+let AUTHer = "";
+
+if (db_things["auth?"]) {
+  AUTHer = db_things.username + ":" + db_things.pass + "@";
+}
+
+url = db_things.protocol + AUTHer + url;
 
 // Database Name
 const dbName = "omct";
