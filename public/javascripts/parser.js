@@ -76,8 +76,30 @@ const getmapdata = function getmapdata(mapid) {
 	}
 };
 
+const getuserdata = function getuserdata(user) {
+
+	try {
+		user = parseInt(user);
+	} catch (e) {
+		if (process.env.DEBUG) {
+			console.log("user isnt id, stopping with")
+		}
+	}
+
+	var uri = "https://osu.ppy.sh/api/get_user?"
+		+ "k=" + osutoken
+		+ "&u=" + user;
+	console.log("getting from osu api: "+uri);
+	let res = request("get", uri);
+	try {
+		return JSON.parse(res.getBody("UTF-8"))[0];
+	} catch (e) {
+		return "err";
+	}
+};
+
 const readstringfrombeginning = function readstringfrombeginning(mybuffer) {
-	let uleb = [];
+	let uleb  = [];
 	let length = 0;
 	if (mybuffer[0] === 0x00) {
 		return {"value": null, "length": length};
@@ -181,6 +203,8 @@ const getvals = function getvals(data) {
 	readerlocation += replaydata.health.length;
 	replaydata.health = replaydata.health.value;
 
+	
+
 	replaydata.accuracy = (
 		(	(replaydata.num300s*300 + replaydata.num100s*100) +
 		(replaydata.num50s*50 + replaydata.num0s*0)		)
@@ -190,11 +214,8 @@ const getvals = function getvals(data) {
 	);
 
 	const mapdata = getmapdata(replaydata.mapmd5);
-	if (mapdata !== "err") { 
-		replaydata.mapdata = mapdata;
-	} else { 
-		replaydata.mapdata = null;
-	}
+	const playerdata = getmapdata(replaydata.playername);
+
 
 	if (mapdata !== "err") {
 		replaydata.omct_score = omctscore(replaydata);
@@ -202,9 +223,14 @@ const getvals = function getvals(data) {
 		replaydata.omct_score = -1;
 	}
 
-	return replaydata;
+	return {
+		replaydata,
+		mapdata,
+		playerdata
+	};
+
 
 };
 
-exports.getvals = getvals;
+module.exports = getvals;
 exports.MODES = MODES;
