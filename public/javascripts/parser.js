@@ -53,12 +53,9 @@ Long	Unknown
 // functions
 const omctscore = function omctscore(replaydata) {
 	return (
-		0.7 + 
-		(
-			0.1 ^ (replaydata.mapdata.max_combo / replaydata.combo) + 
-			0.2 ^ (1 / replaydata.accuracy)
-		) / 
-		(1.01 ^ replaydata.num0s)
+		(0.7 + Math.pow(0.1, (replaydata.mapdata.maxcombo/replaydata.combo)) + Math.pow(0.2, 1/replaydata.accuracy))
+		/
+		Math.pow(1.01, replaydata.num0s)
 	);
 };
 
