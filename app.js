@@ -64,11 +64,25 @@ MongoClient.connect(url, function (err, client) {
   if (err) {
     console.log(err)
   } else {
-    db = client.db(dbName);
+    let db = client.db(dbName);
     console.log("connected to server at " + db_things.ip);
+    global.db = db;
+    console.log(global.db)
   }
 });
 
-global.db = db
+// get the osu token from the config file
+const osutoken = require("./config.json").osutoken;
+
+// start the osu-api instance with my api key
+const osu = require("node-osu");
+global.osuapi = new osu.Api(osutoken, {
+  // baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+  notFoundAsError: true, // Reject on not found instead of returning nothing. (default: true)
+  completeScores: false // When fetching scores also return the beatmap (default: false)
+});
+
+console.log("connected to osu api");
+
 
 module.exports = app;

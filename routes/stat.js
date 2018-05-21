@@ -22,16 +22,41 @@ router.post('/', function (req, res) {
   let uploaded_file = req.files.osr;
   console.log("recieved uploaded file");
   console.log(req.body);
-  let vals = parser.getvals(uploaded_file.data);
-  res.status(200).send(vals);
+  parser(uploaded_file.data).then(replaydata => {
+    
+    res.status(200).send(replaydata);
+    
+    replaydata.bin = uploaded_file.data;
+    
+    global.db.collection("omct_submits")
+    .insertOne(replaydata, function(err, result) {
+      console.log("responding");
+    });
 
-  // Use connect method to connect to the server
+    global.db.collection("players").find({})
+    
+  }).catch(function(err) {
+    let senderror = {error: {}};
+    switch (err) {
+      case "map":
+        senderror.message = "Map could not be found";
+        senderror.error.status = "Map Error";
+        senderror.error.stack = "The map of the replay you just sent could not be found.\nPlease make sure the map hasn't been updated since you save the replay.\nIf it wasn't updated and you keep getting this error,\ncontact oralekin over Discord or email: oralekin@gmail.com.";
+      break;
 
-  global.db.collection("omct_submits")
-    .insertOne({"play": vals}, function(err, result) {
+      case "user":
+        senderror.message = "User could not be found";
+        senderror.error.status = "User Error";
+        senderror.error.stack = "The player of the replay you just sent could not be found.\nPlease make sure the player (you) haven't changed their username.\nIf you keep getting this error please contact oralekin over Discord or email: oralekin@gmail.com.";
+        break;
 
-    console.log("responding");
-
+      default:
+        console.log("unknown error while parsing");
+        console.error(err);
+        senderror = err;
+        break;
+    }
+    res.render("error", senderror);
 
   });
 

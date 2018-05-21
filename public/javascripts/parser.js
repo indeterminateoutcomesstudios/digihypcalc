@@ -51,48 +51,13 @@ Long	Unknown
 
 
 // functions
-const omctscore = function omctscore(replaydata) {
-	return (
-		(0.7 + Math.pow(0.1, (replaydata.mapdata.maxcombo/replaydata.combo)) + Math.pow(0.2, 1/replaydata.accuracy))
-		/
-		Math.pow(1.01, replaydata.num0s)
-	);
-};
-
-
-const getmapdata = function getmapdata(mapid) {
-	var uri = "https://osu.ppy.sh/api/get_beatmaps?"
-		+ "k=" + osutoken
-		+ "&h=" + mapid;
-	console.log("getting from osu api: "+uri);
-	let res = request("get", uri);
-	try {
-		return JSON.parse(res.getBody("UTF-8"))[0];
-	} catch (e) {
-		return "err";
-	}
-};
-
-const getuserdata = function getuserdata(user) {
-
-	try {
-		user = parseInt(user);
-	} catch (e) {
-		if (process.env.DEBUG) {
-			console.log("user isnt id, stopping with")
-		}
-	}
-
-	var uri = "https://osu.ppy.sh/api/get_user?"
-		+ "k=" + osutoken
-		+ "&u=" + user;
-	console.log("getting from osu api: "+uri);
-	let res = request("get", uri);
-	try {
-		return JSON.parse(res.getBody("UTF-8"))[0];
-	} catch (e) {
-		return "err";
-	}
+const omctscore = function omctscore(replaydata, mapdata) {
+	console.log((0.7));
+	console.log((mapdata.maxCombo / replaydata.combo));
+	console.log(Math.pow(0.1, 1/comboratio));
+	console.log((Math.pow(0.2, 1 / replaydata.accuracy)));
+	console.log((Math.pow(1.01, replaydata.num0s)));
+	return (constant + combo_coefficient + acc_coefficient)/misses;
 };
 
 const readstringfrombeginning = function readstringfrombeginning(mybuffer) {
@@ -204,29 +169,30 @@ const getvals = function getvals(data) {
 
 	replaydata.accuracy = (
 		(	(replaydata.num300s*300 + replaydata.num100s*100) +
-		(replaydata.num50s*50 + replaydata.num0s*0)		)
+		(replaydata.num50s*50 + replaydata.num0s*0))
 		/
 		(   (replaydata.num300s*300 + replaydata.num100s*300) +
-		(replaydata.num50s*300 + replaydata.num0s*300)		)
+		(replaydata.num50s*300 + replaydata.num0s*300))
 	);
 
-	const mapdata = getmapdata(replaydata.mapmd5);
-	const playerdata = getmapdata(replaydata.playername);
-
-
-	if (mapdata !== "err") {
-		replaydata.omct_score = omctscore(replaydata);
-	} else {
-		replaydata.omct_score = -1;
-	}
-
-	return {
-		replaydata,
-		mapdata,
-		playerdata
-	};
-
-
+	return new Promise(function(res, err) {
+		global.osuapi.getUser({u: replaydata.playername}).then(function (playerdata) {
+			global.osuapi.getBeatmaps({h: replaydata.mapmd5}).then(function(mapdata) {
+				replaydata.omct_score = omctscore(replaydata, mapdata[0]);
+				res({
+					replaydata,
+					mapdata: mapdata[0],
+					playerdata
+				});
+			}).catch(function(goterr){
+				console.log(goterr);
+				err("map");
+			});
+		}).catch(function(goterr){
+			console.log(goterr);
+			err("user");
+		});
+	});
 };
 
 module.exports = getvals;
