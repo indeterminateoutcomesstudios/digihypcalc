@@ -26,12 +26,34 @@ router.post('/', function (req, res) {
     
     res.status(200).send(replaydata);
     
-    replaydata.bin = uploaded_file.data;
     
+    // put the player id and raw osr data in replaydata
+    replaydata.replaydata.bin = uploaded_file.data;
+    replaydata.replaydata.playerid = replaydata.playerdata.id;
+
+    // insert replaydata into the database:
+    /*
+      {
+        key: value (data from the osr);
+        data: 
+      }
+    */
     global.db.collection("omct_submits")
-    .insertOne(replaydata, function(err, result) {
+    .insertOne(replaydata.replaydata, function(err, result) {
       console.log("responding");
     });
+    
+
+    global.db.collection("players").find()
+    .insertOne(replaydata.mapdata, function(err, result) {
+      console.log("responding");
+    });
+    
+    global.db.collection("maps")
+    .insertOne(replaydata.mapdata, function(err, result) {
+      console.log("responding");
+    });
+
 
     global.db.collection("players").find({})
     

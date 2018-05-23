@@ -12,10 +12,18 @@ mixin playerrow(player)
 
 block content
   h1= title
-  form#osrupload(action="/stat", method="post" encType="multipart/form-data")
+
+
+  script(src="/javascripts/uploadbutton.js")
+  #uploader
+    #preview
+    label#fileble(for="file") Choose replay
+    label#labmit(for="submit") Upload
+
+  form#theform(action="/stat", method="post" encType="multipart/form-data" visible="false")
     input#file(type="file", name="osr" required)
     input(type="hidden", name="browser" value="true").
-    input(type="submit", value="")
+    input#submit(type="submit", value="")
 
   p.
     this should show the leaderboard by default and update 

@@ -17,13 +17,44 @@ a {
 
 #leaderboard tbody tr td.prfp {
   height: 100px;
-  padding-left: 5px;
   width: 1%;
+  text-align: right;
 }
+
 #leaderboard tbody tr td img {
   border-radius: 20px;
   height: 90%;
+  padding: 5%;
 }
+
+
+#uploader {
+  text-align: center
+}
+
+#fileble {
+  width: 50%;
+  height: 20px;
+  background-color: crimson
+}
+
+#fileble:hover {
+  cursor: pointer;
+  background: darkred
+}
+
+#fileble:focus {
+  background: darkred;
+  outline: 1px dotted #000;
+  outline: -webkit-focus-ring-color auto 5px;
+}
+
+#labmit{
+  width: 0.1%;
+  height: 20px;
+  background-color: crimson
+}
+
 
 #leaderboard tbody tr td.name {
   font-family: sans-serif;
