@@ -10,7 +10,7 @@ router.get("/", function(req, res, next) {
     players.forEach(function(player) {
       // replays property of player is an array
       player.replays = [];
-      global.db.collection("omct_submits").toArray()
+      global.db.collection("omct_submits").find({playerid: player.id}).toArray()
       .then(function(replays) {
         replays.forEach(function(replay){
           replay.mapdata = global.db.collection("maps").find({mapid: replay.mapid}).next();
