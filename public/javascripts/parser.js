@@ -52,11 +52,11 @@ Long	Unknown
 
 // functions
 const omctscore = function omctscore(replaydata, mapdata) {
-	console.log((0.7));
-	console.log((mapdata.maxCombo / replaydata.combo));
-	console.log(Math.pow(0.1, 1/comboratio));
-	console.log((Math.pow(0.2, 1 / replaydata.accuracy)));
-	console.log((Math.pow(1.01, replaydata.num0s)));
+	const constant = 0.7;
+	const comboratio = (mapdata.maxCombo / replaydata.combo);
+	const combo_coefficient = Math.pow(0.1, 1/comboratio);
+	const acc_coefficient = Math.pow(0.2, 1 / replaydata.accuracy);
+	const misses = Math.pow(1.01, replaydata.num0s);
 	return (constant + combo_coefficient + acc_coefficient)/misses;
 };
 
@@ -155,7 +155,7 @@ const getvals = function getvals(data) {
 	// is play fc?
 	replaydata.perfect = data.readIntLE(readerlocation, 1);
 	readerlocation += 1;
-	replaydata.perfect = replaydata.perfect == 1;
+	replaydata.perfect = replaydata.perfect === 1;
 
 	// get the mods enum
 	replaydata.mods = data.readIntLE(readerlocation, 4);

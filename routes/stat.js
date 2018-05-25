@@ -8,7 +8,7 @@ var parser = require("../public/javascripts/parser");
     if the request is coming from a server just return raw json
 */
 
-router.post('/', function (req, res) {
+router.post("/", function (req, res) {
 
   console.log("post req recieved");
 
@@ -20,43 +20,60 @@ router.post('/', function (req, res) {
   }
 
   let uploaded_file = req.files.osr;
-  console.log("recieved uploaded file");
-  console.log(req.body);
+
+  console.log("recieved uploaded replay");
   parser(uploaded_file.data).then(replaydata => {
-    
+    // for speed, send the reply before doing db and reassignment actions
     res.status(200).send(replaydata);
-    
+    console.log(replaydata);
+    const player = replaydata.playerdata;
+    const replay = replaydata.replaydata;
+    const map    = replaydata.mapdata;
     
     // put the player id and raw osr data in replaydata
     replaydata.replaydata.bin = uploaded_file.data;
     replaydata.replaydata.playerid = replaydata.playerdata.id;
 
-    // insert replaydata into the database:
-    /*
-      {
-        key: value (data from the osr);
-        data: 
+    // check if the map is in the db
+    global.db.collection("maps").findOne({id: map.id}, function(err, res) {
+      
+      if(err) {
+        throw new Error("database error, failed to find in maps");
+      } else if (!res) {
+        global.db.collection("maps").insertOne(map);
       }
-    */
-    global.db.collection("omct_submits")
-    .insertOne(replaydata.replaydata, function(err, result) {
-      console.log("responding");
-    });
-    
 
-    global.db.collection("players").find()
-    .insertOne(replaydata.mapdata, function(err, result) {
-      console.log("responding");
-    });
-    
-    global.db.collection("maps")
-    .insertOne(replaydata.mapdata, function(err, result) {
-      console.log("responding");
     });
 
 
-    global.db.collection("players").find({})
+    // check if the user is in the db
+    global.db.collection("players").findOne({id: player.id}, function(err, res) {
+      if(err) {
+        throw new Error("database error, failed to find in maps");
+      } else if (!res) {
+        // put the user in if it wasn't in there
+        global.db.collection("players").insertOne(player);
+      }
+    });
     
+    
+    // check if the replay is in the db already, then add it to db
+    global.db.collection("omct_submits").findOne({replaymd5: replay.replaymd5}, function(err, res) {
+      if(err) {
+        throw new Error("database error, failed to find in omct_submits");
+      } else if (!res) {
+        // put the replay if it wasnt there
+        global.db.collection("omct_submits").insertOne(replay);
+      }
+    });
+
+
+
+
+
+
+
+
   }).catch(function(err) {
     let senderror = {error: {}};
     switch (err) {
