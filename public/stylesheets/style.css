@@ -7,42 +7,10 @@ a {
   color: #00B7FF;
 }
 
-#leaderboard {
-  border-radius: 3px;
-  width: 90%;
-  border: 1px solid black;
-
-}
-
-
-#leaderboard tbody tr td.prfp {
-  height: 100px;
-  padding-left: 5px;
-  width: 1%;
-}
-#leaderboard tbody tr td img {
-  border-radius: 20px;
-  height: 90%;
-}
-
-#leaderboard tbody tr td.name {
-  font-family: sans-serif;
-  font-weight: bold;
-  font-size: 30px;
-  color: black;
-  padding-left: 5px;
-}
-#leaderboard tbody tr td.name a {
-  color: black;
-  text-decoration-line: none;  
-}
-#leaderboard>tbody>tr>td.name>a:hover {
-  text-decoration-line: underline;
-}
-#leaderboard tbody tr td .pnts {}
-
-#leaderboard tbody tr td .name {}
-
-#leaderboard tbody tr {
-  height: 10px;
+.hidden {
+  overflow: hidden;
+  width: 0.1px;
+  height: 0.1px;
+  z-index: -1;
+  display: none;
 }

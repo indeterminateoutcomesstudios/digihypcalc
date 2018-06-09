@@ -1,0 +1,29 @@
+#uploader {
+	text-align: center;
+	width: 100%;
+}
+
+.clickable-butan {
+	color: whitesmoke;
+	font-size: 20px;
+	font-weight: bolder;
+	font-family: sans-serif;
+	line-height: 30px;
+	
+	display: inline-block;
+	width: 40%;
+	height: 40px;
+	background-color: crimson;
+	border-radius: 5px;
+}
+
+.clickable-butan:hover {
+	cursor: pointer;
+	background: darkred
+}
+
+.clickable-butan:focus {
+	background: darkred;
+	outline: 1px dotted #000;
+	outline: -webkit-focus-ring-color auto 5px;
+}

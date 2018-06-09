@@ -1,0 +1,11 @@
+mixin playerrow(player)
+  tr
+    td.prfp 
+      img(
+        src="#{'http://a.ppy.sh/' + player.id}"
+        alt="#{player.username + '\'s profile picture'}" 
+        )
+    td.name
+      a(href="#{player.id}")= player.username
+    td.data= "(" + player.name + "'s score)"
+    td.dropdown-button

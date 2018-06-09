@@ -25,7 +25,22 @@ router.post('/', function (req, res) {
   let vals = parser.getvals(uploaded_file.data);
   res.status(200).send(vals);
 
-  // Use connect method to connect to the server
+  console.log("recieved uploaded replay");
+  parser(uploaded_file.data).then(replaydata => {
+    // for speed, send the reply before doing db and reassignment actions
+    if(browser) {
+      res.render("upload", {title:"Upload Successful", data: replaydata});
+    } else {
+      res.status(200).send(replaydata);
+    }
+    console.log(replaydata);
+    const player = replaydata.playerdata;
+    const replay = replaydata.replaydata;
+    const map    = replaydata.mapdata;
+    
+    // put the player id and raw osr data in replaydata
+    replaydata.replaydata.bin = uploaded_file.data;
+    replaydata.replaydata.playerid = replaydata.playerdata.id;
 
   global.db.collection("omct_submits")
     .insertOne({"play": vals}, function(err, result) {
