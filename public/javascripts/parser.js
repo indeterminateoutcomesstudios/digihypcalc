@@ -51,33 +51,17 @@ Long	Unknown
 
 
 // functions
-const omctscore = function omctscore(replaydata) {
-	return (
-		0.7 + 
-		(
-			0.1 ^ (replaydata.mapdata.max_combo / replaydata.combo) + 
-			0.2 ^ (1 / replaydata.accuracy)
-		) / 
-		(1.01 ^ replaydata.num0s)
-	);
-};
-
-
-const getmapdata = function getmapdata(mapid) {
-	var uri = "https://osu.ppy.sh/api/get_beatmaps?"
-		+ "k=" + osutoken
-		+ "&h=" + mapid;
-	console.log("getting from osu api: "+uri);
-	let res = request("get", uri);
-	try {
-		return JSON.parse(res.getBody("UTF-8"))[0];
-	} catch (e) {
-		return "err";
-	}
+const omctscore = function omctscore(replaydata, mapdata) {
+	const constant = 0.7;
+	const comboratio = (mapdata.maxCombo / replaydata.combo);
+	const combo_coefficient = Math.pow(0.1, 1/comboratio);
+	const acc_coefficient = Math.pow(0.2, 1 / replaydata.accuracy);
+	const misses = Math.pow(1.01, replaydata.num0s);
+	return (constant + combo_coefficient + acc_coefficient)/misses;
 };
 
 const readstringfrombeginning = function readstringfrombeginning(mybuffer) {
-	let uleb = [];
+	let uleb  = [];
 	let length = 0;
 	if (mybuffer[0] === 0x00) {
 		return {"value": null, "length": length};
@@ -171,7 +155,7 @@ const getvals = function getvals(data) {
 	// is play fc?
 	replaydata.perfect = data.readIntLE(readerlocation, 1);
 	readerlocation += 1;
-	replaydata.perfect = replaydata.perfect == 1;
+	replaydata.perfect = replaydata.perfect === 1;
 
 	// get the mods enum
 	replaydata.mods = data.readIntLE(readerlocation, 4);
@@ -181,30 +165,35 @@ const getvals = function getvals(data) {
 	readerlocation += replaydata.health.length;
 	replaydata.health = replaydata.health.value;
 
+	
+
 	replaydata.accuracy = (
 		(	(replaydata.num300s*300 + replaydata.num100s*100) +
-		(replaydata.num50s*50 + replaydata.num0s*0)		)
+		(replaydata.num50s*50 + replaydata.num0s*0))
 		/
 		(   (replaydata.num300s*300 + replaydata.num100s*300) +
-		(replaydata.num50s*300 + replaydata.num0s*300)		)
+		(replaydata.num50s*300 + replaydata.num0s*300))
 	);
 
-	const mapdata = getmapdata(replaydata.mapmd5);
-	if (mapdata !== "err") { 
-		replaydata.mapdata = mapdata;
-	} else { 
-		replaydata.mapdata = null;
-	}
-
-	if (mapdata !== "err") {
-		replaydata.omct_score = omctscore(replaydata);
-	} else {
-		replaydata.omct_score = -1;
-	}
-
-	return replaydata;
-
+	return new Promise(function(res, err) {
+		global.osuapi.getUser({u: replaydata.playername}).then(function (playerdata) {
+			global.osuapi.getBeatmaps({h: replaydata.mapmd5}).then(function(mapdata) {
+				replaydata.omct_score = omctscore(replaydata, mapdata[0]);
+				res({
+					replaydata,
+					mapdata: mapdata[0],
+					playerdata
+				});
+			}).catch(function(goterr){
+				console.log(goterr);
+				err("map");
+			});
+		}).catch(function(goterr){
+			console.log(goterr);
+			err("user");
+		});
+	});
 };
 
-exports.getvals = getvals;
+module.exports = getvals;
 exports.MODES = MODES;

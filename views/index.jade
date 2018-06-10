@@ -23,7 +23,7 @@ block content
   form#osrupload(action="/stat", method="post" encType="multipart/form-data")
     input#file(type="file", name="osr" required)
     input(type="hidden", name="browser" value="true").
-    input(type="submit", value="")
+    input#submit(type="submit", value="")
 
   p.
     this should show the leaderboard by default and update 
