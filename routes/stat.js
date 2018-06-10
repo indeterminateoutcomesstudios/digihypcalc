@@ -70,14 +70,6 @@ router.post("/", function (req, res) {
         global.db.collection("omct_submits").insertOne(replay);
       }
     });
-
-
-
-
-
-
-
-
   }).catch(function(err) {
     let senderror = {error: {}};
     switch (err) {
@@ -102,7 +94,6 @@ router.post("/", function (req, res) {
     res.render("error", senderror);
 
   });
-
 });
 
 module.exports = router;

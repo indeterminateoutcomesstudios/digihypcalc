@@ -2,46 +2,70 @@ var express = require("express");
 var router = express.Router();
 
 /* GET home page. */
-router.get("/", function(req, res, next) {
-  global.db.collection("players")
-  .find({}).toArray().then(function(players) {
+router.get("/", function(res, req, next) {
+  res.redirect("/1");
+});
 
+/* GET leaderboard page. */
+router.get('/:round', function(req, res, next) {
+  console.log("got request for round #"+req.params.round);
 
-    players.forEach(function(player) {
-      // replays property of player is an array
-      player.replays = [];
-      global.db.collection("omct_submits").find({playerid: player.id}).toArray()
-      .then(function(replays) {
-        replays.forEach(function(replay){
-          replay.mapdata = global.db.collection("maps")
-          .find({mapid: replay.mapid}).next();
-          // push each relay into the player object with the map data
-          player.replays.push(replay);
-        });
-      });
-    });
+  const thisroundplayers = [];
 
-    // sort the players
+  // find the participinats still playing
+  const participants = global.db.collection("participants")
+  .find({round: req.params.round}).next().players;
 
-    // filter the players to those still i tournament
-    // (under document with .name "participants" under collection "config")
-    const participants = global.db.collection("config")
-    .find({key: "participants"}).next();
+  // get this round's mappool
+  global.db.collection("mappools").find({round: req.params.round}).toArray().then(function(mappools) {
+    global.db.collection("players").find({}).toArray().then(function(players) {
+      // check if the player is in the participants, then load their top play for each map.
+      for (let i = 0; i < players.length; i++) {
+        const player = players[i];
 
-    // FİLTER OUT MAPPOOLS BEFORE THEIR 
-    const mappools = global.db.collection("mappools")
-    .find({}).toArray()
-    .then(function(mappoolarray){
-      mappoolarray.forEach(mappool => {
-        if(mappool.invalidation < new Date()) {
-
+        // ignore players that are eliminated
+        if (!participants.includes(player.id)) {
+          continue;
         }
-      });
-    });
-    // pass mappool to the pug/jade template
-  
+
+        player.plays = {};
+
+        global.db.collection("omct_submits").find({playerid: player.id}).toArray()
+        .then( (replays) => {
+
+          for (let j = 0; j < replays.length; j++) {
+            const replay = replays[j];
+
+            if (replay.id) {
+
+            }
+
+          }
+
+            /**
+             * check if replay is in the current mappool and if it is not, return
+             */
+  //          return;
+            // if it is, save it in `player.`
+            
+            replay.mapdata = global.db.collection("maps")
+            .find({mapid: replay.mapid}).next();
+            
+            // push each score into the player object with the map data
+            player.scores.push(replay);
+
+
+        });
+        
+      }
+
+      // sort players accoridng to point total
+      thisroundplayers.sort(({point_total: a}, {point_total: b}) => {return a-b})
+
+      res.render("index", { title: "express!", thisroundplayers, thisroundmaps });
     
-    res.render("index", { title: "express!", players, mappools, participants });
+    
+    });
   });
 });
 

@@ -69,14 +69,14 @@ MongoClient.connect(url, function (err, client) {
     console.log(err);
   } else {
     let db = client.db(dbName);
-    console.log("connected to server at " + db_things.ip);
+    console.log("connected to db at " + db_things.ip);
     global.db = db;
-    console.log(global.db);
   }
 });
 
 // get the osu token from the config file
 const osutoken = require("./config.json").osutoken;
+
 
 // start the osu-api instance with my api key
 const osu = require("node-osu");

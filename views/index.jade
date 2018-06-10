@@ -9,25 +9,29 @@ mixin playerrow(player)
     td.name
       a(href="https://osu.ppy.sh/#{player.id}")= player.name
     td.data= "(" + player.name + "'s score)"
-
 block content
   h1= title
 
 
+  link(rel='stylesheet', href='/stylesheets/uploading.css')
+  link(rel='stylesheet', href='/stylesheets/leaderboard.css')
   script(src="/javascripts/uploadbutton.js")
-  #uploader
-    #preview
-    label#fileble.clickable-butan(for="file") Choose replay
-    label#labmit.clickable-butan(for="submit") Upload
 
-  form#osrupload(action="/stat", method="post" encType="multipart/form-data")
-    input#file(type="file", name="osr" required)
+  label#upload-button.inputfile(for="file") Choose replay
+  label#upload-button-end(for="endfile")
+
+  form#osrupload.hidden(action="/stat", method="post" encType="multipart/form-data")
+    input#file.inputfile(type="file", name="osr" required)
     input(type="hidden", name="browser" value="true").
-    input#submit(type="submit", value="")
+    input#endfile(type="submit", value="")
 
   p.
     this should show the leaderboard by default and update 
     to show the newly submitted play when a post request is submitted
+  each mappool in mappools
+    p= "name:" + mappool.name
+    P= "maps:" + mappool.maps
+
   table#leaderboard
     thead
     tbody
