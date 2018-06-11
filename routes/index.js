@@ -1,72 +1,96 @@
 var express = require("express");
 var router = express.Router();
 
+
+const round_dates = {
+  1: new Date("2018-06-09T00:00:00Z"),
+  2: new Date("2018-06-20T00:00:00Z"),
+  3: new Date("2018-07-04T00:00:00Z"),
+  4: new Date("2018-07-18T00:00:00Z")
+};
+
+function retrieve_players(round) {
+  return new Promise((resolve, reject) => {
+
+    global.db.collection("participants").find({round}).next().then(({players: participants}) => {
+      global.db.collection("players").find({id: {$in: participants}}).toArray().then(players => {
+        global.db.collection("mappools").find({round}).toArray().then(mappool => {
+          const mappool_hashes = [];
+
+          for (const {hash} of mappool) {
+            console.log(hash);
+            mappool_hashes.push(hash);
+          }
+
+          const players_promises = [];
+          for (let i = 0; i < players.length; i++) {
+            const player = players[i];
+            player.plays = {};
+            players_promises.push(new Promise((res, rej) => {
+              global.db.collection("omct_submits")
+              .find({mapmd5: {$in: mappool_hashes}, date: {$gte: round_dates[round]}, playerid: player.id})
+              .toArray().then(replays => {
+                let replays_promises = [];
+                for (let r = 0; r < replays.length; r++) {
+                  const replay = replays[r];
+
+                  replays_promises.push(new Promise((s, j) => {
+                    global.db.collection("maps").find({hash: replay.mapmd5}).next().then(mapdata => {
+                      replay.mapdata = mapdata;
+                      player.plays[mapid] = replay;
+                    });
+                  }));
+                }
+
+                Promise.all(replays_promises).then(() =>{
+                  res(player);
+                });
+              });
+            }));
+          }
+
+          Promise.all(players_promises).then(players => {
+            resolve(players);
+          });
+
+        });
+      });
+    });
+  });
+}
+
+
 /* GET home page. */
-router.get("/", function(res, req, next) {
-  res.redirect("/1");
+router.get("/", function(req, res, next) {
+  res.redirect("1");
 });
 
 /* GET leaderboard page. */
-router.get('/:round', function(req, res, next) {
-  console.log("got request for round #"+req.params.round);
+router.get("/:round", function(req, res, next) {
 
-  const thisroundplayers = [];
+  const round = parseInt(req.params.round);
 
-  // find the participinats still playing
-  const participants = global.db.collection("participants")
-  .find({round: req.params.round}).next().players;
+  if (round>4) {
+    res.redirect("1");
+  }
 
-  // get this round's mappool
-  global.db.collection("mappools").find({round: req.params.round}).toArray().then(function(mappools) {
-    global.db.collection("players").find({}).toArray().then(function(players) {
-      // check if the player is in the participants, then load their top play for each map.
-      for (let i = 0; i < players.length; i++) {
-        const player = players[i];
+  console.log("got request for round #"+round);
 
-        // ignore players that are eliminated
-        if (!participants.includes(player.id)) {
-          continue;
-        }
-
-        player.plays = {};
-
-        global.db.collection("omct_submits").find({playerid: player.id}).toArray()
-        .then( (replays) => {
-
-          for (let j = 0; j < replays.length; j++) {
-            const replay = replays[j];
-
-            if (replay.id) {
-
-            }
-
-          }
-
-            /**
-             * check if replay is in the current mappool and if it is not, return
-             */
-  //          return;
-            // if it is, save it in `player.`
-            
-            replay.mapdata = global.db.collection("maps")
-            .find({mapid: replay.mapid}).next();
-            
-            // push each score into the player object with the map data
-            player.scores.push(replay);
-
-
-        });
-        
-      }
-
-      // sort players accoridng to point total
-      thisroundplayers.sort(({point_total: a}, {point_total: b}) => {return a-b})
-
-      res.render("index", { title: "express!", thisroundplayers, thisroundmaps });
+  retrieve_players(round).then((players) => {
     
+    res.send(players);
+
+    // format the players for the pug template
     
-    });
+    //sort the players
+    players.sort(({point_total: a}, {point_total: b}) => {return a-b});
+    console.log(players);
+  
+    // render the players using the pug template
+    res.render("index", { title: "omct Round 4 Leaderboard", players });
   });
 });
 
 module.exports = router;
+
+// sort players accoridng to point total

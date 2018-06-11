@@ -8,7 +8,8 @@ mixin playerrow(player)
         )
     td.name
       a(href="https://osu.ppy.sh/#{player.id}")= player.name
-    td.data= "(" + player.name + "'s score)"
+    td.data= "(" + player.name + "'s score): " + player.point_total
+  tr.hidden
 block content
   h1= title
 
@@ -28,9 +29,6 @@ block content
   p.
     this should show the leaderboard by default and update 
     to show the newly submitted play when a post request is submitted
-  each mappool in mappools
-    p= "name:" + mappool.name
-    P= "maps:" + mappool.maps
 
   table#leaderboard
     thead
