@@ -11,7 +11,8 @@ const round_dates = {
 
 function retrieve_players(round) {
   return new Promise((resolve, reject) => {
-
+    console.log(round);
+    console.log(typeof round);
     global.db.collection("participants").find({round}).next().then(({players: participants}) => {
       global.db.collection("players").find({id: {$in: participants}}).toArray().then(players => {
         global.db.collection("mappools").find({round}).toArray().then(mappool => {
@@ -69,7 +70,7 @@ router.get("/", function(req, res, next) {
 router.get("/:round", function(req, res, next) {
 
   const round = parseInt(req.params.round);
-
+  console.log(req.params.round);
   if (round>4) {
     res.redirect("1");
   }
@@ -77,17 +78,15 @@ router.get("/:round", function(req, res, next) {
   console.log("got request for round #"+round);
 
   retrieve_players(round).then((players) => {
-    
-    res.send(players);
+    console.log(players);
 
     // format the players for the pug template
     
     //sort the players
     players.sort(({point_total: a}, {point_total: b}) => {return a-b});
-    console.log(players);
   
     // render the players using the pug template
-    res.render("index", { title: "omct Round 4 Leaderboard", players });
+    res.render("index", { title: `omct Round ${round} Leaderboard`, players });
   });
 });
 
