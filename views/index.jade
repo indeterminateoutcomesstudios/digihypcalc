@@ -4,36 +4,39 @@ mixin playerrow(player)
     td.prfp 
       img(
         src="#{'http://a.ppy.sh/' + player.id}" 
-        alt="oralekin's profile picture"
+        alt="#{player.name}'s profile picture"
         )
     td.name
       a(href="https://osu.ppy.sh/#{player.id}")= player.name
     td.data
       if player.total_score && player.numpasses
-          #{player.total_score.toFixed(2) + " points"}
-          #{player.numpasses + " passes"}
+          p #{player.total_score.toFixed(2) + " points"}
+          p #{player.numpasses + " passes"}
   tr.hidden
 
 block content
   h1= title
+  h1 THIS IS APPROXIMATE STANDING BECAUSE IDK
 
 
   link(rel='stylesheet', href='/stylesheets/uploading.css')
   link(rel='stylesheet', href='/stylesheets/leaderboard.css')
-  script(src="/javascripts/uploadbutton.js")
+  // script(src="/javascripts/uploadbutton.js")
 
-  label#upload-button.inputfile(for="file") Choose replay
-  label#upload-button-end(for="endfile")
+  // label#upload-button.inputfile(for="file") Choose replay
+  // label#upload-button-end(for="endfile")
 
-  form#osrupload.hidden(action="/stat", method="post" encType="multipart/form-data")
+  form#osrupload(action="/stat", method="post" encType="multipart/form-data")
     input#file.inputfile(type="file", name="osr" required)
     input(type="hidden", name="browser" value="true").
     input#endfile(type="submit", value="")
 
-  p.
+  // p.
     this should show the leaderboard by default and update 
     to show the newly submitted play when a post request is submitted
-
+  p.
+    Better than nothing :P
+    
   table#leaderboard
     thead
     tbody
