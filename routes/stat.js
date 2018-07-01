@@ -24,7 +24,7 @@ router.post("/", function (req, res) {
   console.log("recieved uploaded replay");
   parser(uploaded_file.data).then(replaydata => {
     // for speed, send the reply before doing db and reassignment actions
-    if(browser) {
+    if(false) {
       res.render("upload", {title:"Upload Successful", data: replaydata});
     } else {
       res.status(200).send(replaydata);

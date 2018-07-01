@@ -8,8 +8,12 @@ mixin playerrow(player)
         )
     td.name
       a(href="https://osu.ppy.sh/#{player.id}")= player.name
-    td.data= "(" + player.name + "'s score): " + player.point_total
+    td.data
+      if player.total_score && player.numpasses
+          #{player.total_score.toFixed(2) + " points"}
+          #{player.numpasses + " passes"}
   tr.hidden
+
 block content
   h1= title
 

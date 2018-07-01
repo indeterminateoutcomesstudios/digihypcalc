@@ -9,6 +9,7 @@ const fileUpload = require("express-fileupload");
 var indexRouter = require("./routes/index");
 var statRouter = require("./routes/stat");
 var serveReplay = require("./routes/dl_replay");
+// var api = require("./routes/api");
 
 var app = express();
 
@@ -34,6 +35,7 @@ app.use(fileUpload());
 app.use("/", indexRouter);
 app.use("/stat", statRouter);
 app.use("/dl_replay", serveReplay);
+// app.use("/api", api);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

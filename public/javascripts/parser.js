@@ -1,6 +1,7 @@
 // const
 const request = require("sync-request");
 const osutoken = require("../../config.json").osutoken;
+const osr = require("node-osr");
 const MODES = [
 	"osu",
 	"taiko",
@@ -47,17 +48,62 @@ Long	Unknown
 
 //endregion
 */
-
+const mods = {
+	None: 		0,
+	NoFail: 	1,
+	Easy: 		2,
+	Hidden: 	8,
+	HardRock: 	16,
+	SuddenDeath:32,
+	DoubleTime: 64,
+	Relax: 		128,
+	HalfTime: 	256,
+	Nightcore: 	512,
+	Flashlight: 1024,
+	Autoplay: 	2048,
+	SpunOut: 	4096,
+	Relax2: 	8192,
+	Perfect: 	16384,
+	Key4: 		32768,
+	Key5: 		65536,
+	Key6: 		131072,
+	Key7: 		262144,
+	Key8: 		524288,
+	FadeIn: 	1048576,
+	Random: 	2097152,
+	LastMod: 	4194304,
+	Key9: 		16777216,
+	Key10: 		33554432,
+	Key1: 		67108864,
+	Key3: 		134217728,
+	Key2: 		268435456,
+	ScoreV2: 	536870912
+};
 
 
 // functions
+const modfunc = function modfunc(modenum) {
+	modenum = modenum < mods.ScoreV2 ? modenum : modenum - mods.ScoreV2;
+	modenum = modenum & (~(mods.Nightcore));
+	if (Boolean(modenum & (mods.HardRock | mods.DoubleTime))) {
+		modenum = modenum & (~(mods.Hidden));
+	};
+	console.log(modenum.toString(2));
+	return modenum;
+};
+
 const omctscore = function omctscore(replaydata, mapdata) {
 	const constant = 0.7;
-	const comboratio = (mapdata.maxCombo / replaydata.combo);
-	const combo_coefficient = Math.pow(0.1, 1/comboratio);
-	const acc_coefficient = Math.pow(0.2, 1 / replaydata.accuracy);
-	const misses = Math.pow(1.01, replaydata.num0s);
-	return (constant + combo_coefficient + acc_coefficient)/misses;
+
+	const combo_score = Math.pow(0.1, parseInt(mapdata.maxCombo) / replaydata.combo);
+
+	const acc_score = Math.pow(0.2, 1 / replaydata.accuracy);
+
+	const miss_score = Math.pow(1.01, replaydata.num0s);
+
+	const top = combo_score + acc_score;
+
+	return constant + (top / miss_score);
 };
 
 const readstringfrombeginning = function readstringfrombeginning(mybuffer) {
@@ -88,7 +134,7 @@ const readstringfrombeginning = function readstringfrombeginning(mybuffer) {
 	return { "value": extractedstring, "length":  length};
 };
 
-const getvals = function getvals(data) {
+const getvalsOld = function getvals(data) {
 
 	let readerlocation = 0;
 	let replaydata = {};
@@ -158,8 +204,11 @@ const getvals = function getvals(data) {
 	replaydata.perfect = replaydata.perfect === 1;
 
 	// get the mods enum
-	replaydata.mods = data.readIntLE(readerlocation, 4);
+	mods_enum_raw = data.readIntLE(readerlocation, 4);
 	readerlocation += 4;
+
+	replaydata.mods = modfunc(mods_enum_raw);
+
 
 	replaydata.health = readstringfrombeginning(data.slice(readerlocation));
 	readerlocation += replaydata.health.length;
@@ -194,6 +243,95 @@ const getvals = function getvals(data) {
 		});
 	});
 };
+
+const getvals = function getvals(data) {
+	return new Promise((res, rej) => {
+		const obj = osr.read(data).then((results) => {
+			let replaydata = {};
+
+			// get the mode
+			replaydata.mode = MODES[results.gameMode];
+
+			// get the date
+			replaydata.date = results.timestamp;
+
+			// get the map md5 hash
+			replaydata.mapmd5 = results.beatmapMD5;
+
+			// get the player name
+			replaydata.playername = results.playerName;
+
+			// get the replay md5 hash
+			replaydata.replaymd5 = results.replayMD5;
+
+			// get the number of 300s
+			replaydata.num300s = results.number_300s;
+
+			// get the number of 100s
+			replaydata.num100s = results.number_100s;
+
+			// get the number of 50s
+			replaydata.num50s = results.number_50s;
+
+			// get the number of gekis
+			replaydata.numgekis = results.gekis;
+
+			// get the number of katus
+			replaydata.numkatus = results.katus;
+
+			// get the number of misses
+			replaydata.num0s = results.misses;
+
+			// get the total score
+			replaydata.score = results.score;
+
+			// get the max combo
+			replaydata.combo = results.max_combo;
+
+			// is play fc?
+			replaydata.perfect = Boolean(results.perfect_combo);
+
+			// get the mods enum
+			let mods_enum_raw = results.mods;
+
+			replaydata.mods = modfunc(mods_enum_raw);
+
+
+			replaydata.health = results.life_bar;
+
+
+
+			replaydata.accuracy = (
+				((replaydata.num300s * 300 + replaydata.num100s * 100) +
+					(replaydata.num50s * 50 + replaydata.num0s * 0)) /
+				((replaydata.num300s * 300 + replaydata.num100s * 300) +
+					(replaydata.num50s * 300 + replaydata.num0s * 300))
+			);
+
+			global.osuapi.getUser({
+				u: replaydata.playername
+			}).then(function (playerdata) {
+				global.osuapi.getBeatmaps({
+					h: replaydata.mapmd5
+				}).then(function (mapdata) {
+					replaydata.omct_score = omctscore(replaydata, mapdata[0]);
+					res({
+						replaydata,
+						mapdata: mapdata[0],
+						playerdata
+					});
+				}).catch(function (goterr) {
+					console.log(goterr);
+					rej("map");
+				});
+			}).catch(function (goterr) {
+				console.log(goterr);
+				rej("user");
+			});
+		});
+	});
+};
+
 
 module.exports = getvals;
 exports.MODES = MODES;
