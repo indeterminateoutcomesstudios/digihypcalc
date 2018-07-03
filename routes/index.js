@@ -1,14 +1,6 @@
 var express = require("express");
 var router = express.Router();
 
-
-const round_dates = {
-  1: new Date("2018-06-09T00:00:00Z"),
-  2: new Date("2018-06-20T00:00:00Z"),
-  3: new Date("2018-07-04T00:00:00Z"),
-  4: new Date("2018-07-18T00:00:00Z")
-};
-
 function retrieve_players(round) {
   return new Promise((resolve, reject) => {
     console.log(round);
@@ -49,5 +41,3 @@ router.get("/:round", function(req, res, next) {
 });
 
 module.exports = router;
-
-// sort players accoridng to point total

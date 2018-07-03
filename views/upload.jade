@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  h1= `${data.mapdata.title}`
+  h2= `played by ${data.playerdata.name}`
+  h2= `This play is worth ${data.omct_score.toFixed(4)} points!`
+
+  p Your upload was successful, you might or might not see yourself on the #[a(href="/2")= "leaderboard"] in a while even. When the leaderboards are seperated of course...
