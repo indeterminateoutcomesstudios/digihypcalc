@@ -1,5 +1,7 @@
 const db_things = require("./config.json").db_settings;
 const MongoClient = require("mongodb").MongoClient;
+const round = "1";
+
 
 async function plays( player_id, mappool, modpool, db) {
 	let playertotal = 0;
@@ -13,11 +15,13 @@ async function plays( player_id, mappool, modpool, db) {
 		if(play){playertotal += play.omct_score;
 		playerpasses += 1;
 		console.log(`#${z} - ${player_id} on ${mapmd5}: ${play.omct_score}`);
-		z++}
+		z++} else {
+			console.log(`${player_id}: no play on ${mapmd5}`);
+		}
 	}
-	console.log("ending", playertotal, playerpasses)
+	console.log("ending", playertotal, playerpasses);
 	
-	return { playertotal, playerpasses }
+	return { playertotal, playerpasses };
 }
 
 // Connection URL
@@ -37,9 +41,9 @@ MongoClient.connect(url, function (err, client) {
 		let db = client.db("omct");
 		console.log("connected to db at " + db_things.ip);
 		let z = 0;
-		db.collection("participants").find({round: "1"}).next().then(({players: players}) => {
+		db.collection("participants").find({round: round}).next().then(({players: players}) => {
 
-			db.collection("mappools").find({round: 1}).toArray().then((mps) => {
+			db.collection("mappools").find({round: parseInt(round)}).toArray().then((mps) => {
 				const mapd5s = mps.map((val) => val.map);
 				const modems = mps.map((val) => val.enum);
 
@@ -50,7 +54,11 @@ MongoClient.connect(url, function (err, client) {
 						console.log(playertotal);
 						console.log(playerpasses);
 	
-						db.collection("players").updateMany({id: player_id}, {$set: {total_score: playertotal, numpasses: playerpasses}});
+						const toSet = {};
+						toSet[`omct.total_score.${round}`]  = playertotal;
+						toSet[`omct.numpasses.${round}`]  = playerpasses;
+
+						db.collection("players").updateMany({id: player_id}, {$set: toSet});
 						console.log(`${player_id}: ${playertotal} ${playerpasses}`);
 					});
 					
@@ -58,6 +66,5 @@ MongoClient.connect(url, function (err, client) {
 				}
 			});
 		});
-
 	}
 });
