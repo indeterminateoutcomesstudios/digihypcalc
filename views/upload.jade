@@ -2,7 +2,7 @@ extends layout
 
 block content
   h1= `${data.mapdata.title}`
-  a(href=`https://osu.ppy.sh/users/${data.playerdata.id}`)
+  a(href="#{'https://osu.ppy.sh/users/' + data.playerdata.id}")
     h2= `played by ${data.playerdata.name}`
   h2= `This play is worth ${data.replaydata.omct_score.toFixed(4)} points!`
 
