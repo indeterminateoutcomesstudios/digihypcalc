@@ -15,6 +15,7 @@
 	margin-right: 10px;
 	margin-left: 10px;
 	height: 24px;
+	width: fit-content;
 	max-width: 75%;
 }
 
@@ -37,10 +38,12 @@
 
 .btnwrapper {
 	margin: 10px;
+	margin-left: 15%;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
+	width: 70%;
 }
 
 .btn div {

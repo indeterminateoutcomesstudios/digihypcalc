@@ -46,7 +46,7 @@ router.post("/", function (req, res) {
     // console.log(req.body.browser);
 
     if(req.body.browser) {
-      res.render("upload", {title:"Upload Successful", data: replaydata});
+      res.render("upload", {title:"Upload Successful", data: replaydata, back: req.get("Referrer")});
     } else {
       res.status(200).send(replaydata);
     }
