@@ -10,17 +10,12 @@ const parseGetQuery = require("../public/javascripts/geturlparser");
     global.db.collection("players").find({id: {$in: participants}}).sort({});
   });
   
-  
-  console.log(GETparams);
-  
   let mongodbQuery = {};
   
   mongodbQuery["replaydata.replaymd5"] = GETparams.h ? GETparams.h : undefined; 
   global.db.collection("omct_submits").find(mongodbQuery).toArray().then(function (replays) {
     if (!replays.length) {res.status(400).send();}
     const tosend = replays[0];
-    console.log(mongodbQuery);
-    console.log(replays);
     global.db.collection("players")
     .find({"playerdata.id": tosend.id})
     .toArray().then(function (player) {

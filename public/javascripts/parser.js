@@ -88,7 +88,6 @@ const modfunc = function modfunc(modenum) {
 	if (Boolean(modenum & (mods.HardRock | mods.DoubleTime))) {
 		modenum = modenum & (~(mods.Hidden));
 	};
-	console.log(modenum.toString(2));
 	return modenum;
 };
 
