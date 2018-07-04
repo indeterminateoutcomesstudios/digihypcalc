@@ -7,10 +7,13 @@ function retrieve_players(round) {
     global.db.collection("participants").find({"round": String(round)}).next().then((participants) => {
       console.log(participants);
       ({players: participants} = participants);
-      global.db.collection("players").find({id: {$in: participants}}).sort({total_score: -1}).toArray().then(players => {
+      const sortCriteria = {};
+      sortCriteria[`omct.total_score.${round}`] = -1;
+      global.db.collection("players").find({id: {$in: participants}}).sort(sortCriteria).toArray().then(players => {
+        console.log(players);
         resolve(players);
       });
-    });
+    }).catch(() => resolve([]));
   });
 }
 
@@ -36,7 +39,7 @@ router.get("/:round", function(req, res, next) {
     // format the players for the pug template
       
     // render the players using the pug template
-    res.render("index", { title: `omct Round ${round} Leaderboard`, players });
+    res.render("index", { title: `omct Round ${round} Leaderboard`, players, round });
   });
 });
 

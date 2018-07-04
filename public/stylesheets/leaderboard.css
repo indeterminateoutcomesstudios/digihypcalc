@@ -1,3 +1,20 @@
+#content {
+	display: flex;
+	width: 100%;
+	height: fit-content;
+	vertical-align: middle;
+	align-items: center;
+	justify-content: center;
+}
+
+#lbwrapper {
+	display: flex;
+	width: fit-content;
+	height: fit-content;
+	margin: 10px;
+	padding: 5px;
+}
+
 #leaderboard tbody tr td.name {
 	font-family: sans-serif;
 	font-weight: bold;
@@ -10,7 +27,10 @@
 	border-radius: 3px;
 	width: 90%;
 	border: 1px solid black;
-	
+	max-width: 750px;
+	padding: 5px;
+	min-width: 542px;
+
 }
 
 #leaderboard tbody tr td.prfp {
@@ -34,10 +54,24 @@
 	text-decoration-line: underline;
 }
 
-#leaderboard tbody tr td .pnts {}
+#leaderboard tbody tr td .data {
 
-#leaderboard tbody tr td .name {}
+}
+
+#leaderboard tbody tr td .name {
+
+}
 
 #leaderboard tbody tr {
 	height: 10px;
+}
+
+#leaderboard tbody tr td.rank {
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 20px;
+	color: black;
+	padding-left: 5px;
+	text-align: right;
+	width: 20px;
 }

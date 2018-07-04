@@ -1,21 +1,26 @@
 extends layout
-mixin playerrow(player)
+mixin playerrow(player, i)
   tr
+    td.rank= `#${i}`
     td.prfp 
       img(
         src="#{'http://a.ppy.sh/' + player.id}" 
         alt="#{player.name}'s profile picture"
         )
     td.name
-      a(href="https://osu.ppy.sh/#{player.id}")= player.name
+      a(href="https://osu.ppy.sh/users/#{player.id}")= player.name
     td.data
-      if player.total_score && player.numpasses
-          p #{player.total_score.toFixed(2) + " points"}
-          p #{player.numpasses + " passes"}
+      if player.omct.total_score[round] && player.omct.numpasses[round]
+          p #{player.omct.total_score[round].toFixed(2) + " points"}
+          p #{player.omct.numpasses[round] + " passes"}
   tr.hidden
 
 block content
   h1= title
+
+  if round < 4
+    a(href=`/${parseInt(round)+1}`)
+      h2 Click here to go to the next round!
 
   link(rel='stylesheet', href='/stylesheets/uploading.css')
   link(rel='stylesheet', href='/stylesheets/leaderboard.css')
@@ -32,11 +37,16 @@ block content
   // p.
     this should show the leaderboard by default and update 
     to show the newly submitted play when a post request is submitted
-  p.
-    Better than nothing :P
-    
-  table#leaderboard
-    thead
-    tbody
-    each player in players
-      +playerrow(player)
+
+  #content
+    #lbwrapper
+      if players.length > 0
+        table#leaderboard
+          thead
+          tbody
+          - let i = 1
+          each player in players
+            +playerrow(player, i)
+            - i++
+      else
+        p There is no one in this round yet
