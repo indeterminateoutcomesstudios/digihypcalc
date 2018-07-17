@@ -5,7 +5,8 @@ mixin playsrows(player)
     tr
       td= mapname
       if play.score
-        td= `Replay hash: ${play.hash}`
+        td
+          a(href="/dl_users?h=" + play.hash)= `Replay hash: ${play.hash}`
         td= `${play.score} points`
       else
         td(colspan="2") No play found for this map
