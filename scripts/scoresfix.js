@@ -1,4 +1,4 @@
-const db_things = require("./config.json").db_settings;
+const db_things = require("../config.json").db_settings;
 const MongoClient = require("mongodb").MongoClient;
 const osr = require("node-osr");
 
@@ -87,7 +87,7 @@ MongoClient.connect(url, function (err, client) {
 		let db = client.db("omct");
 		console.log("connected to db at " + db_things.ip);
 
- 		db.collection("omct_submits").find({}).forEach(function(doc) {
+ 		db.collection("omct_submits").find({replaymd5: "9ecdc67a8e0bb76684c1c307a302e380"}).forEach(function(doc) {
 
 			console.log("found submit");
 
