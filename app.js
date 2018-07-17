@@ -32,9 +32,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(fileUpload());
 
 
-app.use("/", indexRouter);
 app.use("/stat", statRouter);
 app.use("/dl_replay", serveReplay);
+app.use("/", indexRouter);
 // app.use("/api", api);
 
 // catch 404 and forward to error handler
