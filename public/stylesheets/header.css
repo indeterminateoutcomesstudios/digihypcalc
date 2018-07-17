@@ -1,0 +1,38 @@
+.headerwrapper {
+	display: flex;
+	margin-bottom: 10px;
+	align-items: center;
+	justify-content: center;
+	height: fit-content;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	width: fit-content;
+	height: fit-content;
+	font-family: serif;
+	font-weight: bolder;
+	font-size: 2em;
+}
+
+.arrow {
+	display: flex;
+	margin: 4px;
+	margin-left: 10px;
+	margin-right: 10px;
+	width: 32px;;
+	height: 32px;;
+}
+
+.arrow img {
+	height: 100%;
+	width: 100%;
+}
+
+.title {
+	display: flex;
+	padding-bottom: 2px;
+	text-align: center;
+}

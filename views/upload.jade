@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h1= `${data.mapdata.title}`
+  a(href="#{'https://osu.ppy.sh/users/' + data.playerdata.id}")
+    h2= `played by ${data.playerdata.name}`
+  h2= `This play is worth ${data.replaydata.omct_score.toFixed(4)} points!`
+
+  p Your upload was successful, you might or might not see yourself on the leaderboard in a while. Or not...
+
+  a(href="#{back}") Go back...
+
+  h1 Upload another one ;)
+  #uploadbuttons.btnwrapper
+    link(rel="stylesheet", href="/stylesheets/uploading.css")
+    script(src="/javascripts/uploadbutton.js")
+    label#upload-button.btn(for="file") 
+      div Choose replay
+    label#upload-button-end.btn(for="endfile")
+      div Upload
+
+    form#osrupload(action="/stat", method="post" encType="multipart/form-data")
+      input#file.inputfile(type="file", name="osr" required)
+      input(type="hidden", name="browser" value="true").
+      input#endfile(type="submit", value="")

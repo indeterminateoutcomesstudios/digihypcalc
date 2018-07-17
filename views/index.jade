@@ -1,27 +1,121 @@
 extends layout
-mixin playerrow(player)
-  tr
+
+mixin playsrows(player)
+  for play, mapname in player.omct.rounds[String(round)].plays
+    tr
+      td= mapname
+      if play.score
+        td= `Replay hash: ${play.hash}`
+        td= `${play.score} points`
+      else
+        td(colspan="2") No play found for this map
+  else
+    tr
+      td This player's plays have not been calculated for this round!
+
+mixin playerrow(player, i)
+  if round==1
+    tr
+    td.rank= `#${i}`
     td.prfp 
       img(
         src="#{'http://a.ppy.sh/' + player.id}" 
-        alt="oralekin's profile picture"
+        alt="#{player.name}'s profile picture"
         )
     td.name
-      a(href="#{player.id}")= player.name
-    td.data= "(" + player.name + "'s score)"
+      a(href="https://osu.ppy.sh/users/#{player.id}")= player.name
+    td.data
+      if player.omct.total_score[round] && player.omct.numpasses[round]
+          p #{player.omct.total_score[round].toFixed(2) + " points"}
+          p #{player.omct.numpasses[round] + " passes"}
+  else
+    tr(onclick=`show_plays("${player.name}")`)
+      td.rank= `#${i}`
+      td.prfp 
+        img(
+          src="#{'http://a.ppy.sh/' + player.id}" 
+          alt="#{player.name}'s profile picture"
+          )
+      td.name
+        a(href="https://osu.ppy.sh/users/#{player.id}")= player.name
+      td.data
+        if player.omct.total_score[round] && player.omct.numpasses[round]
+            p #{player.omct.rounds[String(round)].score.toFixed(2) + " points"}
+            p #{player.omct.rounds[String(round)].total + " passes"}
+    tr.hidden(id=`plays-${player.name}` style="width: 100%")
+      td(colspan=4)
+        table
+          +playsrows(player)
+
 
 block content
-  h1= title
-  form#osrupload(action="/stat", method="post" encType="multipart/form-data")
-    input#file(type="file", name="osr" required)
-    input(type="hidden", name="browser" value="true").
-    input(type="submit", value="")
+  link(rel='stylesheet', href='/stylesheets/header.css')
+  link(rel='stylesheet', href='/stylesheets/uploading.css')
+  link(rel='stylesheet', href='/stylesheets/leaderboard.css')
 
-  p.
-    this should show the leaderboard by default and update 
-    to show the newly submitted play when a post request is submitted
-  table#leaderboard
-    thead
-    tbody
-    each player in players
-      +playerrow(player)
+  .headerwrapper
+    #hdr.header
+      if round > 1
+        #leftarrow.arrow
+          a(href=`/${parseInt(round)-1}`)
+            img(
+              src="/images/leftarrow.png"
+              alt=`Go to round ${parseInt(round)-1}`
+            )
+      #title.title= title
+      if round < 4
+        #rightarrow.arrow
+          a(href=`/${parseInt(round)+1}`)
+            img(
+              src="/images/rightarrow.png"
+              alt=`Go to round ${parseInt(round)+1}`
+          )
+
+  #uploadbuttons.btnwrapper
+    script(src="/javascripts/uploadbutton.js")
+    label#upload-button.btn(for="file") 
+      div Choose replay
+    label#upload-button-end.btn(for="endfile")
+      div Upload
+
+    form#osrupload(action="/stat", method="post" encType="multipart/form-data")
+      input#file.inputfile(type="file", name="osr" required)
+      input(type="hidden", name="browser" value="true").
+      input#endfile(type="submit", value="")
+
+
+  #content
+    #lbwrapper
+      script(src="/javascripts/show_plays.js")
+      if players.length > 0
+        table#leaderboard
+          thead
+          tbody
+          - let i = 1
+          each player in players
+            +playerrow(player, i)
+            - i++
+      else
+        p There is no one in this round yet
+
+
+
+//mixin mytable() 
+  td
+    table
+      tr
+        td a
+        td b
+      tr
+        td c
+        td d
+//<!DOCTYPE html>
+//html(lang="en")
+  head
+    title Document
+  body
+    table
+      tr
+      for i in [1, 2, 3]
+        td
+          +mytable()

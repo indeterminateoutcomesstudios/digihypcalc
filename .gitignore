@@ -66,3 +66,6 @@ typings/
 .idea
 .*rc*
 config.json
+
+# my log style!
+*log.txt
